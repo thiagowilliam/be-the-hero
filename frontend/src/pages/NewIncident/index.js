@@ -1,12 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
+
+import api from '../../services/api';
 
 import * as S from './styles';
 import * as FS from '../../styles/form';
 import logoImg from '../../assets/images/logo.svg';
 
 export default function NewIncident() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [value, setValue] = useState('');
+
+  const history = useHistory();
+
+  const ongId = localStorage.getItem('ongId');
+
+  async function handleNewIncident(e) {
+    e.preventDefault();
+
+    const data = {
+      title,
+      description,
+      value,
+    };
+
+    try {
+      await api.post('incidents', data, {
+        headers: {
+          Authorization: ongId,
+        },
+      });
+
+      history.push('/profile');
+    } catch (err) {
+      alert('Erro ao cadastrar caso, tente novamente');
+    }
+  }
+
   return (
     <S.Wrapper>
       <S.Container>
@@ -25,11 +57,25 @@ export default function NewIncident() {
         </section>
 
         <S.Form>
-          <FS.Input type="text" placeholder="Título do caso" />
-          <FS.TextArea placeholder="Descrição" />
-          <FS.Input type="text" placeholder="Valor em reais" />
+          <FS.Input
+            placeholder="Título do caso"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
+          <FS.TextArea
+            placeholder="Descrição"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+          <FS.Input
+            placeholder="Valor em reais"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+          />
 
-          <FS.ButtonRed type="submit">Cadastrar</FS.ButtonRed>
+          <FS.ButtonRed onClick={handleNewIncident} type="submit">
+            Cadastrar
+          </FS.ButtonRed>
         </S.Form>
       </S.Container>
     </S.Wrapper>
